@@ -1216,6 +1216,23 @@ class RulesTests: XCTestCase {
         XCTAssertEqual(try format(input, rules: FormatRules.default, options: options), output)
     }
 
+    // MARK: insertBlankLineAtStartOfScope
+
+    func testInsertBlankLineAtStartOfScope() {
+        let input = """
+        func foo() {
+            let bar = "bar"
+        }
+        """
+        let output = """
+        func foo() {
+
+            let bar = "bar"
+        }
+        """
+        XCTAssertEqual(try format(input, rules: [FormatRules.insertBlankLineAtStartOfScope]), output)
+    }
+
     // MARK: removeBlankLinesAtStartOfScope
 
     func testBlankLinesRemovedAtStartOfFunction() {

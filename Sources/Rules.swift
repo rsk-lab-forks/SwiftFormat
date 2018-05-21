@@ -580,6 +580,36 @@ extension FormatRules {
         }
     }
 
+    /// Adds blank line immediately after an opening brace, bracket, paren or chevron
+    @objc public class func insertBlankLineAtStartOfScope(_ formatter: Formatter) {
+        formatter.forEach(.startOfScope) { i, token in
+            guard ["{", "(", "[", "<"].contains(token.string),
+                let indexOfFirstLineBreak = formatter.index(of: .nonSpaceOrComment, after: i),
+                // If there is extra code on the same line, ignore it
+                formatter.tokens[indexOfFirstLineBreak].isLinebreak
+            else { return }
+            // Find first space token after the first line break
+            var index = indexOfFirstLineBreak + 1
+            var linebreakCount = 0
+            loop: while let token = formatter.token(at: index) {
+                switch token {
+                case .linebreak:
+                    linebreakCount += 1
+                case .space:
+                    break
+                default:
+                    break loop
+                }
+                index += 1
+            }
+
+            if linebreakCount == 0 {
+                formatter.insertToken(.linebreak(formatter.options.linebreak), at: index - 1)
+                return
+            }
+        }
+    }
+
     /// Remove blank lines immediately after an opening brace, bracket, paren or chevron
     @objc public class func removeBlankLinesAtStartOfScope(_ formatter: Formatter) {
         guard formatter.options.removeBlankLines else { return }
